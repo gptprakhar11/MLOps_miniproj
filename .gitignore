@@ -1,0 +1,29 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MLflow tracking artifacts
+mlruns/
+mlartifacts/
+
+# DVC local storage
+.dvc/cache
+.dvc/tmp

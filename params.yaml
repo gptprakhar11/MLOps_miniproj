@@ -1,0 +1,10 @@
+data:
+  raw_train_path: "data/raw/train.csv"
+  raw_later_path: "data/raw/later.csv"
+  holdout_features_path: "data/raw/holdout_features.csv"
+  cleaned_train_path: "data/processed/train_cleaned.csv"
+
+model:
+  target_col: "spoilage_pct"
+  test_size: 0.2
+  random_state: 42
