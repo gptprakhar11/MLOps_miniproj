@@ -32,12 +32,15 @@ CROP_SYNONYMS = {
     "potatoes": "potato",
     "potatos": "potato",
     "potaoto": "potato",
+    "pot.": "potato",
     "onion": "onion",
     "onions": "onion",
     "onoin": "onion",
+    "oni.": "onion",
     "apple": "apple",
     "apples": "apple",
     "appel": "apple",
+    "app.": "apple",
 }
 
 
@@ -101,7 +104,7 @@ def clean_dataframe(
     if "date" in df.columns:
         dates = pd.to_datetime(df["date"], errors="coerce")
         df["month"] = dates.dt.month.fillna(1).astype(int)
-        df["day_of_week"] = dates.dt.dayofweek.fillna(0).astype(int)
+        df["day_of_week"] = dates.dt.day_of_week.fillna(0).astype(int)
 
     # Interaction: storage risk = storage_days * power_cuts_hours
     if "storage_days" in df.columns and "power_cuts_hours" in df.columns:
