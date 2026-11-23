@@ -1,4 +1,5 @@
 """FastAPI prediction service for MP266 Cold Storage Spoilage.
+Service Lead: Aayushman Mathpati (S24CSEU1033)
 
 Endpoints:
     GET  /health   -> {"status": "ok"}
