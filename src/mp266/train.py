@@ -1,4 +1,10 @@
+# Model Lead: Aman Bhandari (S24CSEU1002)
 """Model training pipeline with MLflow tracking for MP266 Cold Storage Spoilage.
+
+Author: Aman Bhandari (S24CSEU1002) - Model Lead
+Role: Model Lead (Model Training, MLflow Tracking, & Champion Model Registry)
+Problem: MP266 - Cold Storage Spoilage (Surat)
+Group: G111
 
 Trains regression models on cleaned train.csv, logs parameters and metrics
 to MLflow (SQLite backend), and registers the best model with a champion alias.
