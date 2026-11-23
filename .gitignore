@@ -27,3 +27,7 @@ mlartifacts/
 # DVC local storage
 .dvc/cache
 .dvc/tmp
+
+# Processed data
+data/processed/
+
