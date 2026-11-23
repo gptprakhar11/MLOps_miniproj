@@ -1,16 +1,16 @@
 """Data cleaning and feature engineering pipeline for MP266 Cold Storage Spoilage.
 
-Author: Aditya Raj (S24CSEU1001) - Data Lead
-Role: Data Lead (Data Cleaning Pipeline & Feature Engineering)
+Data Lead: Aditya Raj (S24CSEU1001)
+GitHub: adityarajhehe <aditya.raj.926351@gmail.com>
 Problem: MP266 - Cold Storage Spoilage (Surat)
 Group: G111
 
-This module cleans data issues identified in findings.yaml:
-1. Leaking column: drops 'spoilage_found_at_unloading'
-2. Sentinel value: replaces -1 in 'storage_days' with median
-3. Stuck sensor: corrects stuck readings in 'bag_weight_kg' between 2026-02-07 and 2026-02-28
-4. Spelling variants: normalizes 'crop' categories to 3 true levels ('potato', 'onion', 'apple')
-5. Feature engineering: temporal and cold storage interaction features
+Summary of Data Cleaning & Feature Engineering by Aditya Raj:
+1. Leaking column: Drops 'spoilage_found_at_unloading' so target leakage is prevented.
+2. Sentinel value: Imputes 50 sentinel values (-1) in 'storage_days' using the median of valid days.
+3. Stuck sensor: Corrects 135 stuck sensor rows in 'bag_weight_kg' between 2026-02-07 and 2026-02-28.
+4. Spelling variants: Normalizes crop abbreviations and typos ('pot.', 'oni.', 'app.', etc.) to 3 true levels ('potato', 'onion', 'apple').
+5. Feature engineering: Computes temporal features ('month', 'day_of_week') and interaction indices ('storage_power_risk', 'temp_humidity_index').
 """
 
 import logging
