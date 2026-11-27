@@ -1,5 +1,7 @@
 """FastAPI prediction service for MP266 Cold Storage Spoilage.
+
 Service Lead: Aayushman Mathpati (S24CSEU1033)
+Role: Service Lead (FastAPI App, Request Rules, Structured Logging)
 
 Endpoints:
     GET  /health   -> {"status": "ok"}
@@ -14,24 +16,40 @@ import json
 import logging
 import sys
 from pathlib import Path
-
-import joblib
-import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-# --- JSON structured logging (handbook section 9) ---
+try:
+    from src.mp266.predict import predict_spoilage
+except ImportError:
+    import joblib
+    import pandas as pd
+
+    _model = None
+    _path = Path("models/model.joblib")
+    if _path.exists():
+        _model = joblib.load(_path)
+
+    def predict_spoilage(data: dict) -> float:
+        if _model is None:
+            return 0.0
+        df = pd.DataFrame([data])
+        return float(_model.predict(df)[0])
+
+
+# JSON structured logging to stdout (never to file)
 class JSONFormatter(logging.Formatter):
     def format(self, record):
-        log_dict = {
+        log_entry = {
             "timestamp": self.formatTime(record),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
         }
         if hasattr(record, "prediction_data"):
-            log_dict["prediction"] = record.prediction_data
-        return json.dumps(log_dict)
+            log_entry["prediction"] = record.prediction_data
+        return json.dumps(log_entry)
+
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(JSONFormatter())
@@ -40,33 +58,18 @@ logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 logger.propagate = False
 
-# --- Load model ---
-MODEL_PATH = Path("models/model.joblib")
-model = None
-if MODEL_PATH.exists():
-    model = joblib.load(MODEL_PATH)
-    logger.info("Model loaded from %s", MODEL_PATH)
-
-# --- FastAPI app ---
 app = FastAPI(title="MP266 Cold Storage Spoilage API", version="1.0")
 
 
 class PredictRequest(BaseModel):
-    """Request body for POST /predict.
-
-    Exactly the fields listed in PROBLEM.md section 5.
-    Client rules enforced via pydantic Field constraints:
-      - temp_set_c: must be <= 20 (above 20 is impossible)
-      - power_cuts_hours: must be >= 0 (below 0 is a typing mistake)
-    """
     storage_days: float = Field(..., description="Days in storage")
-    temp_set_c: float = Field(..., le=20.0, description="Chamber temperature setting (max 20)")
+    temp_set_c: float = Field(..., le=20.0, description="Chamber temperature (max 20°C)")
     humidity_pct: float = Field(..., description="Chamber humidity percentage")
-    power_cuts_hours: float = Field(..., ge=0.0, description="Power cut hours (min 0)")
-    bag_weight_kg: float = Field(..., description="Weight per bag in kg")
+    power_cuts_hours: float = Field(..., ge=0.0, description="Power cuts in hours (min 0)")
+    bag_weight_kg: float = Field(..., description="Bag weight in kg")
     door_openings_per_day: float = Field(..., description="Average door openings per day")
     crop: str = Field(..., description="Crop stored: potato, onion, or apple")
-    chamber: str = Field(..., description="Storage chamber: Chamber 1, Chamber 2, or Chamber 3")
+    chamber: str = Field(..., description="Chamber: Chamber 1, Chamber 2, or Chamber 3")
 
 
 class PredictResponse(BaseModel):
@@ -79,21 +82,15 @@ class HealthResponse(BaseModel):
 
 @app.get("/health", response_model=HealthResponse)
 def health():
-    """Health check endpoint for readiness and liveness probes."""
     return HealthResponse(status="ok")
 
 
 @app.post("/predict", response_model=PredictResponse)
-def predict(req: PredictRequest):
-    """Predict spoilage percentage for a cold storage lot."""
-    if model is None:
-        return PredictResponse(prediction=0.0)
+def predict(request: PredictRequest):
+    data = request.model_dump()
+    result = predict_spoilage(data)
 
-    input_df = pd.DataFrame([req.model_dump()])
-    prediction = float(model.predict(input_df)[0])
-
-    # Structured JSON log for every prediction (never log personal details)
-    log_record = logger.makeRecord(
+    record = logger.makeRecord(
         name="mp266_api",
         level=logging.INFO,
         fn="predict",
@@ -102,17 +99,7 @@ def predict(req: PredictRequest):
         args=(),
         exc_info=None,
     )
-    log_record.prediction_data = {
-        "storage_days": req.storage_days,
-        "temp_set_c": req.temp_set_c,
-        "humidity_pct": req.humidity_pct,
-        "power_cuts_hours": req.power_cuts_hours,
-        "bag_weight_kg": req.bag_weight_kg,
-        "door_openings_per_day": req.door_openings_per_day,
-        "crop": req.crop,
-        "chamber": req.chamber,
-        "result": prediction,
-    }
-    logger.handle(log_record)
+    record.prediction_data = {**data, "result": result}
+    logger.handle(record)
 
-    return PredictResponse(prediction=prediction)
+    return PredictResponse(prediction=result)
