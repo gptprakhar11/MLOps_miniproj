@@ -1,3 +1,4 @@
+
 """Model prediction and inference module for MP266 Cold Storage Spoilage.
 
 Model Lead: Aman Bhandari (S24CSEU1002)
@@ -49,3 +50,4 @@ def predict_spoilage(features: Union[Dict[str, Any], pd.DataFrame]) -> float:
         return float(np.round(prediction[0], 4))
     except Exception:
         return 0.0
+
