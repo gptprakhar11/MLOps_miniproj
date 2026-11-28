@@ -1,30 +1,53 @@
-"""Model inference logic for MP266 Cold Storage Spoilage prediction.
 
-Service Lead: Aayushman Mathpati (S24CSEU1033)
+"""Model prediction and inference module for MP266 Cold Storage Spoilage.
+
+Model Lead: Aman Bhandari (S24CSEU1002)
+Role: Model Lead (Model Serving & Inference Logic)
 """
 
 from pathlib import Path
+from typing import Any, Dict, Union
 import joblib
+import numpy as np
 import pandas as pd
 
 MODEL_PATH = Path("models/model.joblib")
-_model = None
+_MODEL = None
 
 
-def load_model():
-    """Load and cache the trained champion model from disk."""
-    global _model
-    if _model is None and MODEL_PATH.exists():
-        _model = joblib.load(MODEL_PATH)
-    return _model
+def load_model(model_path: Union[str, Path] = MODEL_PATH):
+    """Load trained pipeline artifact from disk with caching."""
+    global _MODEL
+    path = Path(model_path)
+    if _MODEL is not None:
+        return _MODEL
+    if path.exists():
+        _MODEL = joblib.load(path)
+        return _MODEL
+    return None
 
 
-def predict_spoilage(data: dict) -> float:
-    """Generate spoilage percentage prediction for chamber input data."""
-    model = load_model()
-    if model is None:
+def predict_spoilage(features: Union[Dict[str, Any], pd.DataFrame]) -> float:
+    """Generate spoilage percentage prediction for a storage lot.
+
+    Args:
+        features: Dictionary or DataFrame with lot characteristics.
+
+    Returns:
+        Predicted spoilage_pct as a float (or 0.0 on error).
+    """
+    try:
+        model = load_model()
+        if model is None:
+            return 0.0
+
+        if isinstance(features, dict):
+            df = pd.DataFrame([features])
+        else:
+            df = features.copy()
+
+        prediction = model.predict(df)
+        return float(np.round(prediction[0], 4))
+    except Exception:
         return 0.0
 
-    input_df = pd.DataFrame([data])
-    prediction = float(model.predict(input_df)[0])
-    return prediction
