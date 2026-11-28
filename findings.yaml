@@ -1,63 +1,53 @@
-# MP266 findings --- fill in every value, keep every key.
-# Service Lead: Aayushman Mathpati (S24CSEU1033)
-# The marking tool reads this file. Write null only where the comment says so.
-# Use the exact column names and group values from your data files.
-
-group_id: "G111"          # your group id, e.g. "G042"
-problem_id: "MP266"
-
+group_id: G111
+problem_id: MP266
 data_issues:
-  # For each of the 7 kinds: present: true or false.
-  # If present is false, leave the other values as null.
   leaking_column:
     present: true
-    column: "spoilage_found_at_unloading"           # the column that must not be used as a feature
+    column: spoilage_found_at_unloading
   unit_mixup:
     present: false
-    column: null           # the column recorded in a different unit
-    group_value: null      # the value of chamber whose rows are affected
-    factor: null           # wrong value = right value x factor
+    column: null
+    group_value: null
+    factor: null
   sentinel_value:
     present: true
-    column: "storage_days"
-    value: -1            # the special number typed instead of a blank
-    count: 50            # how many rows have it
+    column: storage_days
+    value: -1
+    count: 50
   duplicate_rows:
     present: false
-    count: null            # number of EXTRA copies (rows you would delete)
+    count: null
   stuck_sensor:
     present: true
-    column: "bag_weight_kg"
-    start_date: "2026-02-07"       # first date with the stuck value, YYYY-MM-DD
-    end_date: "2026-02-28"         # last date with the stuck value, YYYY-MM-DD
+    column: bag_weight_kg
+    start_date: '2026-02-07'
+    end_date: '2026-02-28'
   target_typos:
     present: false
-    count: null            # rows whose target was typed 10 times too big
+    count: null
   spelling_variants:
     present: true
-    column: "crop"
-    true_levels: 3      # how many real categories there are after cleaning
-
+    column: crop
+    true_levels: 3
 tracking:
-  experiment_name: "mp266_spoilage"
-  best_run_id: "08ef2773e078440b8fb7e6bd31f39532"        # the MLflow run id of your v1 model
-  registered_model_name: "mp266_spoilage_model"
-  champion_version: 1
-
+  experiment_name: mp266_spoilage
+  best_run_id: 08ef2773e078440b8fb7e6bd31f39532
+  registered_model_name: mp266_spoilage_model
+  champion_version: 2
 monitoring:
-  psi:                     # cleaned train.csv vs later.csv, 10 bins
-    storage_days: null
-    temp_set_c: null
-    humidity_pct: null
-    power_cuts_hours: null
-    bag_weight_kg: null
-    door_openings_per_day: null
-  most_drifted_feature: null
-  mae_by_group:            # v1 on later.csv, per value of chamber
-    'Chamber 1': null
-    'Chamber 2': null
-    'Chamber 3': null
-  worst_served_group: null
-  mae_v1_on_check: null    # v1 on the last 30% of later.csv (by date)
-  mae_v2_on_check: null    # v2 on the same rows
-  decision: null           # promote or keep
+  psi:
+    storage_days: 0.0521
+    temp_set_c: 4.2489
+    humidity_pct: 0.0161
+    power_cuts_hours: 0.0352
+    bag_weight_kg: 0.3145
+    door_openings_per_day: 0.0329
+  most_drifted_feature: temp_set_c
+  mae_by_group:
+    Chamber 1: 4.9344
+    Chamber 2: 0.9466
+    Chamber 3: 0.8356
+  worst_served_group: Chamber 1
+  mae_v1_on_check: 1.9004
+  mae_v2_on_check: 1.2799
+  decision: promote
