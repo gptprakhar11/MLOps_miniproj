@@ -31,3 +31,9 @@ mlartifacts/
 # Processed data
 data/processed/
 
+# Team Distribution Archives
+stage3_distribution/
+stage3_distribution.zip
+stage3_team_handoff/
+
+
